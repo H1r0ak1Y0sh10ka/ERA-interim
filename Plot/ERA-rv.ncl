@@ -30,14 +30,22 @@ begin
 
   dirc = "/Volumes/RAID01/research/DATA/ERA-interim/"
 
-  f_rv    = addfile (dirc+"ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
+;  f_rv    = addfile (dirc+"ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
+  f_rv    = addfile ("/Volumes/RAID01/research/DATA/ERA-interim/ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
+
+
+
 
   lat  = f_rv->latitude
   lon  = f_rv->longitude
   time = f_rv->time
-  rv   = f_rv->vo
 
- ;
+  rv   = f_rv->vo
+  rv_fixed = rv * rv@scale_factor + rv@add_offset
+; Copy over metadata from rv to rv_fixed:
+  copy_VarMeta(rv,rv_fixed)
+
+;
  ; Convert to UTC time.
  ;
    utc_date = cd_calendar(time, 0)
@@ -49,31 +57,42 @@ begin
        e_ii = ii
      end if
      end if
-
    end do
 
 ;************************************************
 ; create default plot
 ;************************************************
-  wks = gsn_open_wks("png","erainterim")              ; send graphics to PNG file
+  wks = gsn_open_wks("png","erainterim")         ; send graphics to PNG file
 
   res                       = True               ; plot mods desired
+  
+  res@gsnDraw   = False
+  res@gsnFrame  = False
+  ;res@vpWidthF             = 1.0
+  ;res@vpHeightF            = 0.3
 
-  res@mpMinLatF              =  -20.0
-  res@mpMaxLatF              =   20.0
-  res@mpMinLonF              =  150
-  res@mpMaxLonF              =  210
-  res@tiYAxisFontHeightF  = 0.025                             ; default 
-  res@tiXAxisFontHeightF  = 0.025                             ; default 
+  ;res@mpMinLatF           =  -20.0
+  ;res@mpMaxLatF           =   20.0
+  res@mpCenterLatF        =    0
+  ;res@mpMinLonF           =  150
+  ;res@mpMaxLonF           =  210
+  res@mpCenterLonF        =  180
 
+  res@gsnAddCyclic        = False
 
+  res@sfXArray               = lon          ; assign lat/lon
+  res@sfYArray               = lat
+
+  res@tiYAxisFontHeightF  =  0.025               ; default 
+  res@tiXAxisFontHeightF  =  0.025               ; default 
 
   res@cnFillOn              = True               ; turn on color fill
   res@cnFillPalette         = "BlAqGrYeOrRe"     ; set color map
   res@cnLinesOn             = False              ; turn off contour lines
 
-  plot = gsn_csm_contour_map(wks,rv(s_ii,0,:,:),res)     
-
+  plot = gsn_csm_contour_map_ce(wks,rv_fixed(0,0,:,:),res) 
+  draw(plot)
+  frame(wks) 
 
 exit
 end
