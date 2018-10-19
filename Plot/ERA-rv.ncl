@@ -34,17 +34,17 @@ begin
   f_rv    = addfile ("/Volumes/RAID01/research/DATA/ERA-interim/ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
 
 
-
-
   lat  = f_rv->latitude
   lon  = f_rv->longitude
   time = f_rv->time
 
-  rv   = f_rv->vo
-  rv_fixed = rv * rv@scale_factor + rv@add_offset
+  rv_fixed  = short2flt(f_rv->vo)
+;  rv_fixed = rv * rv@scale_factor + rv@add_offset
 ; Copy over metadata from rv to rv_fixed:
-  copy_VarMeta(rv,rv_fixed)
-
+;  copy_VarMeta(rv,rv_fixed)
+  rv_fixed = doubletofloat(rv_fixed)
+printVarSummary(rv_fixed)
+;exit
 ;
  ; Convert to UTC time.
  ;
@@ -68,14 +68,14 @@ begin
   
   res@gsnDraw   = False
   res@gsnFrame  = False
-  ;res@vpWidthF             = 1.0
-  ;res@vpHeightF            = 0.3
+  res@vpWidthF             = 1.0
+  res@vpHeightF            = 0.3
 
-  ;res@mpMinLatF           =  -20.0
-  ;res@mpMaxLatF           =   20.0
+  res@mpMinLatF           =  -20.0
+  res@mpMaxLatF           =   20.0
   res@mpCenterLatF        =    0
-  ;res@mpMinLonF           =  150
-  ;res@mpMaxLonF           =  210
+  res@mpMinLonF           =  150
+  res@mpMaxLonF           =  210
   res@mpCenterLonF        =  180
 
   res@gsnAddCyclic        = False
