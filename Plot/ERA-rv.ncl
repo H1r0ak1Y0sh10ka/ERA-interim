@@ -1,5 +1,6 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
+load "~/work/WRF/Plot/DrawConfiguration.ncl"
 
 begin
 
@@ -31,7 +32,7 @@ begin
   dirc = "/Volumes/RAID01/research/DATA/ERA-interim/"
 
 ;  f_rv    = addfile (dirc+"ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
-  f_rv    = addfile ("/Volumes/RAID01/research/DATA/ERA-interim/ERA_interim-tropics-0125deg-plev-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
+  f_rv    = addfile ("/Volumes/RAID01/research/DATA/ERA-interim/ERA_interim-global-05deg-plev-850hpa-201601-Vorticity.nc.nc", "r"); note the "s" of addfile
 
 
   lat  = f_rv->latitude
@@ -43,9 +44,7 @@ begin
 ; Copy over metadata from rv to rv_fixed:
 ;  copy_VarMeta(rv,rv_fixed)
   rv_fixed = doubletofloat(rv_fixed)
-printVarSummary(rv_fixed)
-;exit
-;
+
  ; Convert to UTC time.
  ;
    utc_date = cd_calendar(time, 0)
@@ -68,6 +67,7 @@ printVarSummary(rv_fixed)
   
   res@gsnDraw   = False
   res@gsnFrame  = False
+  res@gsnMaximize         = True
   res@vpWidthF             = 1.0
   res@vpHeightF            = 0.3
 
@@ -86,11 +86,9 @@ printVarSummary(rv_fixed)
   res@tiYAxisFontHeightF  =  0.025               ; default 
   res@tiXAxisFontHeightF  =  0.025               ; default 
 
-  res@cnFillOn              = True               ; turn on color fill
-  res@cnFillPalette         = "BlAqGrYeOrRe"     ; set color map
-  res@cnLinesOn             = False              ; turn off contour lines
+  Config_rv_shade(res)
 
-  plot = gsn_csm_contour_map_ce(wks,rv_fixed(0,0,:,:),res) 
+  plot = gsn_csm_contour_map_ce(wks,rv_fixed(s_ii,:,:)*10^5,res) 
   draw(plot)
   frame(wks) 
 
